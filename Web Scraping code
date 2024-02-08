@@ -1,10 +1,12 @@
 import requests
 from bs4 import BeautifulSoup
 import json
+
 Base_url = 'https://dangcongsan.vn/tu-tuong-van-hoa/';
 response = requests.get('https://dangcongsan.vn/tu-tuong-van-hoa/p/1')
 html_content = response.content
 soup = BeautifulSoup(html_content, 'html.parser')
+
 def save_data(articles):
     json_file_path = 'articles_data.json'
     try:
@@ -15,11 +17,13 @@ def save_data(articles):
         print(f"Data successfully saved to {json_file_path}")
     except Exception as e:
         print(f"Error saving data to {json_file_path}: {e}")
+
 def get_soup(url):
     response = requests.get(url)
     html_content = response.content
     soup = BeautifulSoup(html_content, 'html.parser')
     return soup
+
 def trang_tiep_theo(soup):
     div_next_url = soup.find('div',{'class': 'ex_page'})
     next_urls = div_next_url.find_all('a', {'class':'boxdv1'})
@@ -28,7 +32,8 @@ def trang_tiep_theo(soup):
             new_url = (next_url['href'])
             return new_url
         else:
-            None           
+            None    
+
 def trich_xuat(link_bai):
     try:
         response = requests.get(link_bai)
@@ -45,6 +50,7 @@ def trich_xuat(link_bai):
     except Exception as e:
         print(f"Error: {e}")
         return None
+
 def trich_bai_bao(soup):
     articles =[]
     if soup == get_soup('https://dangcongsan.vn/tu-tuong-van-hoa/p/1') or soup == get_soup('https://dangcongsan.vn/tu-tuong-van-hoa'):
@@ -58,8 +64,7 @@ def trich_bai_bao(soup):
                 'Content': s_article_content,
                 'URL': s_article_url
             }
-            articles.append(s_article_data)
-        
+            articles.append(s_article_data)    
     All_divs = soup.body.find_all('div', class_='col-md-4 col-sm-12 col0 box-thumbnail')
     for All_div in All_divs:
         link = All_div.find_next('a')
@@ -73,10 +78,10 @@ def trich_bai_bao(soup):
                 'URL': article_url
             }
             articles.append(article_data)
-            
     return articles
-save_data(trich_bai_bao(soup))
 
+
+save_data(trich_bai_bao(soup))
 while True:
     next_page_url = Base_url + trang_tiep_theo(soup)
     if next_page_url:
